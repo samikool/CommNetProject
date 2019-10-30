@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <unistd.h>
 
 //function takes a addrinfo struct and prints associated IPv4 address
 void printIP(struct addrinfo *serverInfo);
@@ -46,6 +47,7 @@ int main(int argc, char *argv[]){
     printf("%d\n", bytesSent);
     int bytesRecieved = recvfrom(UDPSocket, buffer, sizeof(buffer), 0, udpServerInfo->ai_addr, &udpServerInfo->ai_addrlen);
     printf("%d\n", bytesRecieved);
+    printf("%s\n", buffer);
 
     int spaceIndex = -1;
     for(int i=0; i<bytesRecieved; i++){
@@ -111,7 +113,7 @@ int main(int argc, char *argv[]){
 
         send(tcpSocket, sendBuffer, sizeof(sendBuffer), 0);
         recv(tcpSocket, receiveBuffer, sizeof(receiveBuffer), 0);
-        printf("%s\n", receiveBuffer);
+        printf("TC{ Data Received: %s\n", receiveBuffer);
 
         if(strcmp("quit", sendBuffer) == 0){
             close(tcpSocket);
@@ -120,7 +122,6 @@ int main(int argc, char *argv[]){
         memset(sendBuffer, 0, sizeof(sendBuffer));
         memset(receiveBuffer, 0, sizeof(receiveBuffer));
     }
-
 
     exit(1);
 }

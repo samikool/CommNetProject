@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #include <arpa/inet.h>
@@ -19,60 +20,114 @@ int main(int argc, char *argv[]){
     printf("Server Port: %s\n", UDPServerPort);
     printf("User Name: %s\n", name);
 
-    struct addrinfo connectionInfo;
-    struct addrinfo *serverInfo;
+    struct addrinfo udpConnectionInfo;
+    struct addrinfo *udpServerInfo;
 
-    memset(&connectionInfo, 0, sizeof(connectionInfo));
+    memset(&udpConnectionInfo, 0, sizeof(udpConnectionInfo));
 
-    connectionInfo.ai_family = PF_INET;
-    connectionInfo.ai_socktype = SOCK_DGRAM;
-    connectionInfo.ai_flags = AI_PASSIVE;
+    udpConnectionInfo.ai_family = PF_INET;
+    udpConnectionInfo.ai_socktype = SOCK_DGRAM;
+    udpConnectionInfo.ai_flags = AI_PASSIVE;
 
-    if(getaddrinfo(UDPServerHostName, UDPServerPort, &connectionInfo, &serverInfo) != 0){
+    if(getaddrinfo(UDPServerHostName, UDPServerPort, &udpConnectionInfo, &udpServerInfo) != 0){
         exit(-1);
     }
 
-    printIP(serverInfo);
+    printIP(udpServerInfo);
 
-    int UDPSocket = socket(serverInfo->ai_family, serverInfo->ai_socktype, serverInfo->ai_protocol);
+    int UDPSocket = socket(udpServerInfo->ai_family, udpServerInfo->ai_socktype, udpServerInfo->ai_protocol);
     if(UDPSocket == -1){
         exit(-1);
     }
 
     /*Begin sending/receiving UDP Portion*/
-    int status = 4;
-    status = connect(UDPSocket, serverInfo->ai_addr, serverInfo->ai_addrlen);
-    printf("%d\n", status);
-    status = 4;
-
     char buffer[100];
+    int bytesSent = sendto(UDPSocket, name, strlen(name), 0, udpServerInfo->ai_addr, udpServerInfo->ai_addrlen);
+    printf("%d\n", bytesSent);
+    int bytesRecieved = recvfrom(UDPSocket, buffer, sizeof(buffer), 0, udpServerInfo->ai_addr, &udpServerInfo->ai_addrlen);
+    printf("%d\n", bytesRecieved);
 
-    status = send(UDPSocket, name, strlen(name), 0);
-    printf("%d\n", status);
-    status = 4;
+    int spaceIndex = -1;
+    for(int i=0; i<bytesRecieved; i++){
+        if(buffer[i] == ' '){
+            spaceIndex = i;
+            break;
+        }
+    }
 
-    status = recv(UDPSocket, buffer, sizeof(buffer), 0);
-    printf("%d\n", status);
-    status = 4;
+    /*Parse reply from UDP Server*/
+    char* TCPServerHostName = (char *) calloc(spaceIndex, sizeof(char));
+    for(int i=0; i<spaceIndex; i++){
+        TCPServerHostName[i] = buffer[i];
+    }
 
+    char* TCPServerPort = (char *) calloc(bytesRecieved-spaceIndex, sizeof(char));
+    for(int i=spaceIndex+1; i<bytesRecieved; i++){
+        TCPServerPort[i-(spaceIndex+1)] = buffer[i]; 
+    }
+    printf("%s\n", TCPServerHostName);
+    printf("%s\n", TCPServerPort);
+     
+    /*Setup TCP Connection*/
+    struct addrinfo tcpConnectionInfo;
+    struct addrinfo *tcpServerInfo;
 
+    memset(&tcpConnectionInfo, 0, sizeof(tcpConnectionInfo));
 
+    tcpConnectionInfo.ai_family = PF_INET;
+    tcpConnectionInfo.ai_socktype = SOCK_STREAM;
+    tcpConnectionInfo.ai_flags = AI_PASSIVE;
 
-    /*
-    char buffer[100];
-
-    status = sendto(UDPSocket, name, strlen(name), 0, serverInfo->ai_addr, serverInfo->ai_addrlen);
-    printf("%d\n", status);
-    status = recvfrom(UDPSocket, buffer, sizeof(buffer), 0, serverInfo->ai_addr, &serverInfo->ai_addrlen);
-    printf("%d\n", status);
-     */
+    if(getaddrinfo(TCPServerHostName, TCPServerPort, &tcpConnectionInfo, &tcpServerInfo) != 0){
+        exit(-1);
+    }
     
+    printIP(tcpServerInfo);
+
+    int tcpSocket = socket(tcpServerInfo->ai_family, tcpServerInfo->ai_socktype, tcpServerInfo->ai_protocol);
+    if(tcpSocket == -1){
+        exit(-1);
+    }
+
+    printf("socket initialized\n");
+
+    if(connect(tcpSocket, tcpServerInfo->ai_addr, tcpServerInfo->ai_addrlen) == -1){
+        exit(-1);
+    }
+    printf("connected\n");
+
+    send(tcpSocket, "sam-morgan", strlen("sam-morgan"), 0);
+    char tcpBuffer[100];
+    recv(tcpSocket, tcpBuffer, sizeof(buffer), 0);
+    printf("%s\n", tcpBuffer);
+
+    bool done = false;
+    char sendBuffer[50];
+    char receiveBuffer[50];
+    while(!done){
+        printf("Next message?");
+        gets(sendBuffer);
+        printf("%s\n", sendBuffer);
+
+        send(tcpSocket, sendBuffer, sizeof(sendBuffer), 0);
+        recv(tcpSocket, receiveBuffer, sizeof(receiveBuffer), 0);
+        printf("%s\n", receiveBuffer);
+
+        if(strcmp("quit", sendBuffer) == 0){
+            close(tcpSocket);
+            done = true;
+        }
+        memset(sendBuffer, 0, sizeof(sendBuffer));
+        memset(receiveBuffer, 0, sizeof(receiveBuffer));
+    }
+
+
     exit(1);
 }
 
 //function takes a addrinfo struct and prints associated IPv4 address
 void printIP(struct addrinfo *serverInfo){
-    char ipstr[INET6_ADDRSTRLEN];
+    char ipstr[INET6_ADDRSTRLEN];   
     int i=0;
     char* ipver;
     void *addr;

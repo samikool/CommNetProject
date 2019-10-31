@@ -34,8 +34,6 @@ int main(int argc, char *argv[]){
         exit(-1);
     }
 
-    printIP(udpServerInfo);
-
     int UDPSocket = socket(udpServerInfo->ai_family, udpServerInfo->ai_socktype, udpServerInfo->ai_protocol);
     if(UDPSocket == -1){
         exit(-1);
@@ -44,10 +42,10 @@ int main(int argc, char *argv[]){
     /*Begin sending/receiving UDP Portion*/
     char buffer[100];
     int bytesSent = sendto(UDPSocket, name, strlen(name), 0, udpServerInfo->ai_addr, udpServerInfo->ai_addrlen);
-    printf("%d\n", bytesSent);
+    printf("UDP Data sent: %s\n", name);
     int bytesRecieved = recvfrom(UDPSocket, buffer, sizeof(buffer), 0, udpServerInfo->ai_addr, &udpServerInfo->ai_addrlen);
-    printf("%d\n", bytesRecieved);
-    printf("%s\n", buffer);
+    printf("UDP Data rcvd: %s\n", buffer);
+    
 
     int spaceIndex = -1;
     for(int i=0; i<bytesRecieved; i++){
@@ -67,8 +65,6 @@ int main(int argc, char *argv[]){
     for(int i=spaceIndex+1; i<bytesRecieved; i++){
         TCPServerPort[i-(spaceIndex+1)] = buffer[i]; 
     }
-    printf("%s\n", TCPServerHostName);
-    printf("%s\n", TCPServerPort);
      
     /*Setup TCP Connection*/
     struct addrinfo tcpConnectionInfo;
@@ -83,39 +79,35 @@ int main(int argc, char *argv[]){
     if(getaddrinfo(TCPServerHostName, TCPServerPort, &tcpConnectionInfo, &tcpServerInfo) != 0){
         exit(-1);
     }
-    
-    printIP(tcpServerInfo);
 
     int tcpSocket = socket(tcpServerInfo->ai_family, tcpServerInfo->ai_socktype, tcpServerInfo->ai_protocol);
     if(tcpSocket == -1){
         exit(-1);
     }
 
-    printf("socket initialized\n");
-
     if(connect(tcpSocket, tcpServerInfo->ai_addr, tcpServerInfo->ai_addrlen) == -1){
         exit(-1);
     }
-    printf("connected\n");
 
     send(tcpSocket, "sam-morgan", strlen("sam-morgan"), 0);
+    printf("TCP Data Sent: %s\n", "sam-morgan");
     char tcpBuffer[100];
     recv(tcpSocket, tcpBuffer, sizeof(buffer), 0);
-    printf("%s\n", tcpBuffer);
+    printf("TCP Data rcvd: %s\n", tcpBuffer);
 
     bool done = false;
     char sendBuffer[50];
     char receiveBuffer[50];
     while(!done){
         printf("Next message?");
-        gets(sendBuffer);
-        printf("%s\n", sendBuffer);
+        fgets(sendBuffer, sizeof(sendBuffer), stdin);
+        printf("TCP data sent: %s", sendBuffer);
 
         send(tcpSocket, sendBuffer, sizeof(sendBuffer), 0);
         recv(tcpSocket, receiveBuffer, sizeof(receiveBuffer), 0);
-        printf("TC{ Data Received: %s\n", receiveBuffer);
+        printf("TCP data rcvd: %s", receiveBuffer);
 
-        if(strcmp("quit", sendBuffer) == 0){
+        if(strcmp("quit\n", sendBuffer) == 0){
             close(tcpSocket);
             done = true;
         }

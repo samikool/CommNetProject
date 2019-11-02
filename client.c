@@ -174,52 +174,46 @@ int main(int argc, char *argv[]){
     //this next line of code just copies the name passed into the program into the send buffer and adds a \n to keep formatting
     strcpy(sendBuffer, strcat(name,"\n"));
     int count = 0;
-    //enter loop
-
+    
+    /*Send TCP message - Since connect()  was already already called I just need to pass the socket, pointer to the buffer, size and 0 */
+    /*for the flag. The server info is already encapsulated in the socket descripter*/
     send(tcpSocket, sendBuffer, sizeof(sendBuffer), 0);
     printf("TCP data sent: %s", sendBuffer);
 
+    /* Receive TCP message - Similar to above, since connect was called already I just need to pass socket, pointer to the buffer, size,   /
+    /  and set 0 for the flags. Note: this receive is a blocking receive so if we never got a response from the server it would  be stuck  /
+    /  here                                                                                                                               */
     recv(tcpSocket, receiveBuffer, sizeof(receiveBuffer), 0);
     printf("TCP data rcvd: %s", receiveBuffer);
 
+    /* Here the buffers are cleared and set to 0 so messages don't get mixed together */
     memset(sendBuffer, 0, sizeof(sendBuffer));
     memset(receiveBuffer, 0, sizeof(receiveBuffer));
+    count++;
 
-    do{
+    /*Enter loop*/
+    while(true)
         /* This part asks the user what they want their message to be and reads the line into the send buffer */
         printf("Next message? ");
         fgets(sendBuffer, sizeof(sendBuffer), stdin);
 
+        send(tcpSocket, sendBuffer, sizeof(sendBuffer), 0);
+        printf("TCP data sent: %s", sendBuffer);
+        
+        recv(tcpSocket, receiveBuffer, sizeof(receiveBuffer), 0);
+        printf("TCP data rcvd: (%d) Message is: %s", count, receiveBuffer);
+
         /*If the message is quit\n then the user wants to exit the program*/
         if(strcmp("quit\n", sendBuffer) == 0){
-            //first the last messages is sent so the server knows to close
-            send(tcpSocket, sendBuffer, sizeof(sendBuffer), 0);
-            printf("TCP data sent: %s", sendBuffer);
-            recv(tcpSocket, receiveBuffer, sizeof(receiveBuffer), 0);
-            printf("TCP data rcvd: (%d) Message is: %s", count, receiveBuffer);
-
             /*then close() is called. close() prevents further read and writes going through the socket. This is true even for the server /
             / if they try to read or send data to the socket they will get an error.                                                     */
             close(tcpSocket);
             //lastly done is set to true so the loop will exit
-            done = true;
         }
 
-        /*Send TCP message - Since connect()  was already already called I just need to pass the socket, pointer to the buffer, size and 0 */
-        /*for the flag. The server info is already encapsulated in the socket descripter*/
-        send(tcpSocket, sendBuffer, sizeof(sendBuffer), 0);
-        printf("TCP data sent: %s", sendBuffer);
-        /* Receive TCP message - Similar to above, since connect was called already I just need to pass socket, pointer to the buffer, size,   /
-        /  and set 0 for the flags. Note: this receive is a blocking receive so if we never got a response from the server it would  be stuck  /
-        /  here                                                                                                                               */
-        recv(tcpSocket, receiveBuffer, sizeof(receiveBuffer), 0);
-        printf("TCP data rcvd: (%d) Message is: %s", count, receiveBuffer);
-
-        /* Here the buffers are cleared and set to 0 so messages don't get mixed together */
         memset(sendBuffer, 0, sizeof(sendBuffer));
         memset(receiveBuffer, 0, sizeof(receiveBuffer));
         count++;
-    }while(!done);
-        
+    }   
     exit(1);
 }

@@ -192,7 +192,7 @@ int main(int argc, char *argv[]){
     count++;
 
     /*Enter loop*/
-    while(true)
+    while(true){
         /* This part asks the user what they want their message to be and reads the line into the send buffer */
         printf("Next message? ");
         fgets(sendBuffer, sizeof(sendBuffer), stdin);

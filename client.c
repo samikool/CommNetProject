@@ -169,8 +169,8 @@ int main(int argc, char *argv[]){
     / user enters "quit" then the connection is closed. Below I will comment on the loop to show what is happening                    /
     /*********************************************************************************************************************************/
     bool done = false; //boolean to keep track of when the loop should exit
-    char sendBuffer[25]; //send buffer holds the message that will be sent to the server
-    char receiveBuffer[25]; //receive buffer holds the response from the server
+    char sendBuffer[50]; //send buffer holds the message that will be sent to the server
+    char receiveBuffer[50]; //receive buffer holds the response from the server
     //this next line of code just copies the name passed into the program into the send buffer and adds a \n to keep formatting
     strcpy(sendBuffer, strcat(name,"\n"));
     //enter loop

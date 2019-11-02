@@ -209,6 +209,7 @@ int main(int argc, char *argv[]){
             / if they try to read or send data to the socket they will get an error.                                                     */
             close(tcpSocket);
             //lastly done is set to true so the loop will exit
+            break;
         }
 
         memset(sendBuffer, 0, sizeof(sendBuffer));

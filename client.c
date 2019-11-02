@@ -180,7 +180,7 @@ int main(int argc, char *argv[]){
     printf("TCP data sent: %s", sendBuffer);
 
     recv(tcpSocket, receiveBuffer, sizeof(receiveBuffer), 0);
-    printf("TCP data rcvd: (%d) Message is: %s", count, receiveBuffer);
+    printf("TCP data rcvd: %s", receiveBuffer);
 
     memset(sendBuffer, 0, sizeof(sendBuffer));
     memset(receiveBuffer, 0, sizeof(receiveBuffer));

@@ -175,6 +175,16 @@ int main(int argc, char *argv[]){
     strcpy(sendBuffer, strcat(name,"\n"));
     int count = 0;
     //enter loop
+
+    send(tcpSocket, sendBuffer, sizeof(sendBuffer), 0);
+    printf("TCP data sent: %s", sendBuffer);
+
+    recv(tcpSocket, receiveBuffer, sizeof(receiveBuffer), 0);
+    printf("TCP data rcvd: (%d) Message is: %s", count, receiveBuffer);
+
+    memset(sendBuffer, 0, sizeof(sendBuffer));
+    memset(receiveBuffer, 0, sizeof(receiveBuffer));
+
     do{
         /*Send TCP message - Since connect()  was already already called I just need to pass the socket, pointer to the buffer, size and 0 */
         /*for the flag. The server info is already encapsulated in the socket descripter*/

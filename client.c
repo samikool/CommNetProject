@@ -186,20 +186,6 @@ int main(int argc, char *argv[]){
     memset(receiveBuffer, 0, sizeof(receiveBuffer));
 
     do{
-        /*Send TCP message - Since connect()  was already already called I just need to pass the socket, pointer to the buffer, size and 0 */
-        /*for the flag. The server info is already encapsulated in the socket descripter*/
-        send(tcpSocket, sendBuffer, sizeof(sendBuffer), 0);
-        printf("TCP data sent: %s", sendBuffer);
-        /* Receive TCP message - Similar to above, since connect was called already I just need to pass socket, pointer to the buffer, size,   /
-        /  and set 0 for the flags. Note: this receive is a blocking receive so if we never got a response from the server it would  be stuck  /
-        /  here                                                                                                                               */
-        recv(tcpSocket, receiveBuffer, sizeof(receiveBuffer), 0);
-        printf("TCP data rcvd: (%d) Message is: %s", count, receiveBuffer);
-
-        /* Here the buffers are cleared and set to 0 so messages don't get mixed together */
-        memset(sendBuffer, 0, sizeof(sendBuffer));
-        memset(receiveBuffer, 0, sizeof(receiveBuffer));
-
         /* This part asks the user what they want their message to be and reads the line into the send buffer */
         printf("Next message? ");
         fgets(sendBuffer, sizeof(sendBuffer), stdin);
@@ -218,6 +204,20 @@ int main(int argc, char *argv[]){
             //lastly done is set to true so the loop will exit
             done = true;
         }
+
+        /*Send TCP message - Since connect()  was already already called I just need to pass the socket, pointer to the buffer, size and 0 */
+        /*for the flag. The server info is already encapsulated in the socket descripter*/
+        send(tcpSocket, sendBuffer, sizeof(sendBuffer), 0);
+        printf("TCP data sent: %s", sendBuffer);
+        /* Receive TCP message - Similar to above, since connect was called already I just need to pass socket, pointer to the buffer, size,   /
+        /  and set 0 for the flags. Note: this receive is a blocking receive so if we never got a response from the server it would  be stuck  /
+        /  here                                                                                                                               */
+        recv(tcpSocket, receiveBuffer, sizeof(receiveBuffer), 0);
+        printf("TCP data rcvd: (%d) Message is: %s", count, receiveBuffer);
+
+        /* Here the buffers are cleared and set to 0 so messages don't get mixed together */
+        memset(sendBuffer, 0, sizeof(sendBuffer));
+        memset(receiveBuffer, 0, sizeof(receiveBuffer));
         count++;
     }while(!done);
         

@@ -175,8 +175,9 @@ int main(int argc, char *argv[]){
     strcpy(sendBuffer, strcat(name,"\n"));
     int count = 0;
     
-    /*Send TCP message - Since connect()  was already already called I just need to pass the socket, pointer to the buffer, size and 0 */
-    /*for the flag. The server info is already encapsulated in the socket descripter*/
+    /*For the first message I send it outside the loop since that message is sort of special.                                           /
+    / Send TCP message - Since connect()  was already already called I just need to pass the socket, pointer to the buffer, size and 0  /
+    / for the flag. The server info is already encapsulated in the socket descripter                                                   */
     send(tcpSocket, sendBuffer, sizeof(sendBuffer), 0);
     printf("TCP data sent: %s", sendBuffer);
 
@@ -191,7 +192,7 @@ int main(int argc, char *argv[]){
     memset(receiveBuffer, 0, sizeof(receiveBuffer));
     count++;
 
-    /*Enter loop*/
+    /*Enter loop. The loop will follow the same format as above, send, receive, clear buffers for next message*/
     while(true){
         /* This part asks the user what they want their message to be and reads the line into the send buffer */
         printf("Next message? ");
@@ -208,7 +209,7 @@ int main(int argc, char *argv[]){
             /*then close() is called. close() prevents further read and writes going through the socket. This is true even for the server /
             / if they try to read or send data to the socket they will get an error.                                                     */
             close(tcpSocket);
-            //lastly done is set to true so the loop will exit
+            //lastly break to exit loop
             break;
         }
 

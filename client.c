@@ -198,9 +198,10 @@ int main(int argc, char *argv[]){
         printf("Next message? ");
         fgets(sendBuffer, sizeof(sendBuffer), stdin);
 
+        /*send data with send()*/
         send(tcpSocket, sendBuffer, sizeof(sendBuffer), 0);
         printf("TCP data sent: %s", sendBuffer);
-        
+        /*receive data with recv()*/
         recv(tcpSocket, receiveBuffer, sizeof(receiveBuffer), 0);
         printf("TCP data rcvd: (%d) Message is: %s", count, receiveBuffer);
 
@@ -213,8 +214,10 @@ int main(int argc, char *argv[]){
             break;
         }
 
+        /*clear buffers*/
         memset(sendBuffer, 0, sizeof(sendBuffer));
         memset(receiveBuffer, 0, sizeof(receiveBuffer));
+        /*increment count*/
         count++;
     }   
     exit(1);

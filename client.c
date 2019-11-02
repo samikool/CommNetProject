@@ -191,7 +191,7 @@ int main(int argc, char *argv[]){
 
         /* This part asks the user what they want their message to be and reads the line into the send buffer */
         printf("Next message? ");
-        fgets(sendBuffer, sizeof(sendBuffer), stdin);
+        fgets(sendBuffer, 500, stdin);
 
         /*If the message is quit\n then the user wants to exit the program*/
         if(strcmp("quit\n", sendBuffer) == 0){

@@ -173,6 +173,7 @@ int main(int argc, char *argv[]){
     char receiveBuffer[512]; //receive buffer holds the response from the server
     //this next line of code just copies the name passed into the program into the send buffer and adds a \n to keep formatting
     strcpy(sendBuffer, strcat(name,"\n"));
+    int count = 0;
     //enter loop
     do{
         /*Send TCP message - Since connect()  was already already called I just need to pass the socket, pointer to the buffer, size and 0 */
@@ -183,7 +184,7 @@ int main(int argc, char *argv[]){
         /  and set 0 for the flags. Note: this receive is a blocking receive so if we never got a response from the server it would  be stuck  /
         /  here                                                                                                                               */
         recv(tcpSocket, receiveBuffer, sizeof(receiveBuffer), 0);
-        printf("TCP data rcvd: %s", receiveBuffer);
+        printf("TCP data rcvd: (%d) Message is: %s", count, receiveBuffer);
 
         /* Here the buffers are cleared and set to 0 so messages don't get mixed together */
         memset(sendBuffer, 0, sizeof(sendBuffer));
@@ -199,7 +200,7 @@ int main(int argc, char *argv[]){
             send(tcpSocket, sendBuffer, sizeof(sendBuffer), 0);
             printf("TCP data sent: %s", sendBuffer);
             recv(tcpSocket, receiveBuffer, sizeof(receiveBuffer), 0);
-            printf("TCP data rcvd: %s", receiveBuffer);
+            printf("TCP data rcvd: (%d) Message is: %s", count, receiveBuffer);
 
             /*then close() is called. close() prevents further read and writes going through the socket. This is true even for the server /
             / if they try to read or send data to the socket they will get an error.                                                     */
@@ -207,6 +208,7 @@ int main(int argc, char *argv[]){
             //lastly done is set to true so the loop will exit
             done = true;
         }
+        count++;
     }while(!done);
         
     exit(1);
